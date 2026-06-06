@@ -1,0 +1,20 @@
+{
+  "home": {
+    "title": "Minhas Viagens",
+    "loading": "Carregando...",
+    "error": "Erro: {{message}}",
+    "empty": "Nenhuma viagem criada. Clique em + para criar uma.",
+    "newTrip": "Nova Viagem",
+    "tripNamePlaceholder": "Nome da viagem",
+    "cancel": "Cancelar",
+    "create": "Criar",
+    "photosCount": "{{count}} fotos",
+    "photosCount_plural": "{{count}} fotos"
+  },
+  "trip": {
+    "addPhotos": "Adicionar Fotos",
+    "map": "Mapa",
+    "gallery": "Galeria",
+    "empty": "Nenhuma foto nesta viagem."
+  }
+}

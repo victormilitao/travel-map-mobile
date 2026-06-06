@@ -1,0 +1,20 @@
+{
+  "home": {
+    "title": "My Trips",
+    "loading": "Loading...",
+    "error": "Error: {{message}}",
+    "empty": "No trips yet. Tap + to create one.",
+    "newTrip": "New Trip",
+    "tripNamePlaceholder": "Trip name",
+    "cancel": "Cancel",
+    "create": "Create",
+    "photosCount": "{{count}} photo",
+    "photosCount_plural": "{{count}} photos"
+  },
+  "trip": {
+    "addPhotos": "Add Photos",
+    "map": "Map",
+    "gallery": "Gallery",
+    "empty": "No photos in this trip."
+  }
+}
