@@ -10,6 +10,7 @@ interface AppState {
   isLoading: boolean;
   error: string | null;
   repository: IPhotoRepository;
+  showTimelinePath: boolean;
   
   // Actions
   loadTrips: () => Promise<void>;
@@ -18,6 +19,7 @@ interface AppState {
   loadPhotosForTrip: (tripId: string) => Promise<void>;
   addPhotosToTrip: (tripId: string, photos: Photo[]) => Promise<void>;
   setRepository: (repo: IPhotoRepository) => void;
+  toggleTimelinePath: () => void;
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -25,10 +27,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentTripPhotos: [],
   isLoading: false,
   error: null,
+  showTimelinePath: true,
   
   repository: new LocalPhotoRepository(),
 
   setRepository: (repo: IPhotoRepository) => set({ repository: repo }),
+
+  toggleTimelinePath: () => set((state) => ({ showTimelinePath: !state.showTimelinePath })),
 
   loadTrips: async () => {
     set({ isLoading: true, error: null });
