@@ -140,7 +140,7 @@ export default function TripDetailScreen() {
             <Text style={styles.emptyText}>{t('trip.empty')}</Text>
           </View>
         ) : activeTab === 'map' ? (
-          <PhotoMap photos={mapPhotos} />
+          <PhotoMap photos={mapPhotos} playLabel={t('trip.playNextPhoto')} />
         ) : (
           <FlatList
             data={currentTripPhotos}

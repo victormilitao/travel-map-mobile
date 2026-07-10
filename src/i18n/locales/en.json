@@ -15,6 +15,7 @@
     "addPhotos": "Add Photos",
     "map": "Map",
     "gallery": "Gallery",
-    "empty": "No photos in this trip."
+    "empty": "No photos in this trip.",
+    "playNextPhoto": "Next photo"
   }
 }

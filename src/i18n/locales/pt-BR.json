@@ -15,6 +15,7 @@
     "addPhotos": "Adicionar Fotos",
     "map": "Mapa",
     "gallery": "Galeria",
-    "empty": "Nenhuma foto nesta viagem."
+    "empty": "Nenhuma foto nesta viagem.",
+    "playNextPhoto": "Próxima foto"
   }
 }
