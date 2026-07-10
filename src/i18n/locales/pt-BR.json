@@ -16,6 +16,7 @@
     "map": "Mapa",
     "gallery": "Galeria",
     "empty": "Nenhuma foto nesta viagem.",
-    "timelinePath": "Caminho"
+    "timelinePath": "Caminho",
+    "playNextPhoto": "Próxima foto"
   }
 }

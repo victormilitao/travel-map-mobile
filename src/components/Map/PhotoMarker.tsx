@@ -6,9 +6,10 @@ import PhotoThumbnail from './PhotoThumbnail';
 
 interface PhotoMarkerProps {
   photo: Photo;
+  isActive?: boolean;
 }
 
-export default function PhotoMarker({ photo }: PhotoMarkerProps) {
+export default function PhotoMarker({ photo, isActive = false }: PhotoMarkerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   if (!photo.latitude || !photo.longitude) return null;
@@ -34,6 +35,7 @@ export default function PhotoMarker({ photo }: PhotoMarkerProps) {
       <PhotoThumbnail
         uri={photo.uri}
         onLoad={handleImageLoad}
+        isActive={isActive}
       />
     </Marker>
   );

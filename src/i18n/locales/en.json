@@ -16,6 +16,7 @@
     "map": "Map",
     "gallery": "Gallery",
     "empty": "No photos in this trip.",
-    "timelinePath": "Path"
+    "timelinePath": "Path",
+    "playNextPhoto": "Next photo"
   }
 }

@@ -145,6 +145,7 @@ export default function TripDetailScreen() {
             showTimelinePath={showTimelinePath}
             onToggleTimeline={toggleTimelinePath}
             toggleLabel={t('trip.timelinePath')}
+            playLabel={t('trip.playNextPhoto')}
           />
         ) : (
           <FlatList

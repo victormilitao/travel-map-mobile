@@ -1,60 +1,80 @@
-import React, { useRef, useEffect, useMemo } from 'react';
+import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
 import { Photo } from '../../core/entities/Photo';
 import PhotoMarker from './PhotoMarker';
 import TimelineToggle from './TimelineToggle';
+import PhotoPlayButton from './PhotoPlayButton';
 
 interface PhotoMapProps {
   photos: Photo[];
   showTimelinePath?: boolean;
   onToggleTimeline?: () => void;
   toggleLabel?: string;
+  playLabel?: string;
 }
 
-export default function PhotoMap({ 
-  photos, 
-  showTimelinePath = true, 
+export default function PhotoMap({
+  photos,
+  showTimelinePath = true,
   onToggleTimeline,
   toggleLabel = 'Timeline',
+  playLabel = 'Play',
 }: PhotoMapProps) {
   const mapRef = useRef<MapView>(null);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
-  // Sort photos by creation time to create chronological path
   const sortedPhotos = useMemo(() => {
-    return [...photos].sort((a, b) => a.creationTime - b.creationTime);
+    return [...photos]
+      .filter((photo) => photo.latitude !== null && photo.longitude !== null)
+      .sort((a, b) => a.creationTime - b.creationTime);
   }, [photos]);
 
-  // Create coordinates array for the polyline
   const pathCoordinates = useMemo(() => {
-    return sortedPhotos
-      .filter(p => p.latitude !== null && p.longitude !== null)
-      .map(p => ({
-        latitude: p.latitude!,
-        longitude: p.longitude!,
-      }));
+    return sortedPhotos.map((photo) => ({
+      latitude: photo.latitude!,
+      longitude: photo.longitude!,
+    }));
+  }, [sortedPhotos]);
+
+  const activePhotoId = activeIndex >= 0 ? sortedPhotos[activeIndex]?.id : null;
+
+  const focusPhoto = useCallback((photo: Photo) => {
+    if (!mapRef.current || photo.latitude === null || photo.longitude === null) return;
+
+    mapRef.current.animateToRegion(
+      {
+        latitude: photo.latitude,
+        longitude: photo.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      800
+    );
+  }, []);
+
+  useEffect(() => {
+    setActiveIndex(-1);
   }, [sortedPhotos]);
 
   useEffect(() => {
-    if (photos.length > 0 && mapRef.current) {
-      const firstValidPhoto = photos.find(p => p.latitude !== null && p.longitude !== null);
-      if (firstValidPhoto) {
-        // Pequeno delay para garantir que o mapa já terminou de carregar
-        setTimeout(() => {
-          mapRef.current?.animateToRegion({
-            latitude: firstValidPhoto.latitude!,
-            longitude: firstValidPhoto.longitude!,
-            latitudeDelta: 0.1,
-            longitudeDelta: 0.1,
-          }, 1000);
-        }, 500);
-      }
+    if (sortedPhotos.length > 0 && mapRef.current) {
+      setTimeout(() => {
+        focusPhoto(sortedPhotos[0]);
+      }, 500);
     }
-  }, [photos]);
+  }, [sortedPhotos, focusPhoto]);
+
+  const handlePlayPress = () => {
+    if (sortedPhotos.length === 0) return;
+
+    const nextIndex = (activeIndex + 1) % sortedPhotos.length;
+    setActiveIndex(nextIndex);
+    focusPhoto(sortedPhotos[nextIndex]);
+  };
 
   return (
     <View style={styles.container}>
-      {/* Toggle Button */}
       {onToggleTimeline && pathCoordinates.length > 1 && (
         <TimelineToggle
           isEnabled={showTimelinePath}
@@ -62,12 +82,14 @@ export default function PhotoMap({
           label={toggleLabel}
         />
       )}
-      
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-      >
-        {/* Timeline Path */}
+
+      <PhotoPlayButton
+        onPress={handlePlayPress}
+        label={playLabel}
+        disabled={sortedPhotos.length === 0}
+      />
+
+      <MapView ref={mapRef} style={styles.map}>
         {showTimelinePath && pathCoordinates.length > 1 && (
           <Polyline
             coordinates={pathCoordinates}
@@ -77,10 +99,13 @@ export default function PhotoMap({
             geodesic={true}
           />
         )}
-        
-        {/* Photo Markers */}
-        {photos.map((photo) => (
-          <PhotoMarker key={photo.id} photo={photo} />
+
+        {sortedPhotos.map((photo) => (
+          <PhotoMarker
+            key={photo.id}
+            photo={photo}
+            isActive={photo.id === activePhotoId}
+          />
         ))}
       </MapView>
     </View>

@@ -5,12 +5,13 @@ import { Image } from 'expo-image';
 interface PhotoThumbnailProps {
   uri: string;
   onLoad?: () => void;
+  isActive?: boolean;
 }
 
 const PIN_SIZE = 56;
 const POINTER_SIZE = 14;
 
-export default function PhotoThumbnail({ uri, onLoad }: PhotoThumbnailProps) {
+export default function PhotoThumbnail({ uri, onLoad, isActive = false }: PhotoThumbnailProps) {
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export default function PhotoThumbnail({ uri, onLoad }: PhotoThumbnailProps) {
   return (
     <Animated.View style={[styles.wrapper, { transform: [{ scale: scaleAnim }] }]}>
       {/* Anel externo gradiente-like */}
-      <View style={styles.outerRing}>
+      <View style={[styles.outerRing, isActive && styles.outerRingActive]}>
         {/* Container da foto */}
         <View style={styles.photoContainer}>
           <Image
@@ -39,7 +40,7 @@ export default function PhotoThumbnail({ uri, onLoad }: PhotoThumbnailProps) {
         </View>
       </View>
       {/* Ponteiro triangular do pin */}
-      <View style={styles.pointer} />
+      <View style={[styles.pointer, isActive && styles.pointerActive]} />
     </Animated.View>
   );
 }
@@ -61,9 +62,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    // Borda sutil com cor premium
     borderWidth: 2.5,
     borderColor: '#6C63FF',
+  },
+  outerRingActive: {
+    width: PIN_SIZE + 12,
+    height: PIN_SIZE + 12,
+    borderRadius: (PIN_SIZE + 12) / 2,
+    borderWidth: 3.5,
+    borderColor: '#FF6B6B',
   },
   photoContainer: {
     width: PIN_SIZE,
@@ -86,5 +93,8 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderTopColor: '#6C63FF',
+  },
+  pointerActive: {
+    borderTopColor: '#FF6B6B',
   },
 });
