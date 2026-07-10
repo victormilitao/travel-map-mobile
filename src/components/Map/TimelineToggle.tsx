@@ -34,8 +34,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
-    zIndex: 1,
+    elevation: 8,
+    zIndex: 3,
   },
   buttonActive: {
     backgroundColor: '#6C63FF',

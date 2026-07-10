@@ -75,20 +75,6 @@ export default function PhotoMap({
 
   return (
     <View style={styles.container}>
-      {onToggleTimeline && pathCoordinates.length > 1 && (
-        <TimelineToggle
-          isEnabled={showTimelinePath}
-          onToggle={onToggleTimeline}
-          label={toggleLabel}
-        />
-      )}
-
-      <PhotoPlayButton
-        onPress={handlePlayPress}
-        label={playLabel}
-        disabled={sortedPhotos.length === 0}
-      />
-
       <MapView ref={mapRef} style={styles.map}>
         {showTimelinePath && pathCoordinates.length > 1 && (
           <Polyline
@@ -108,6 +94,22 @@ export default function PhotoMap({
           />
         ))}
       </MapView>
+
+      <View style={styles.overlay} pointerEvents="box-none">
+        {onToggleTimeline && pathCoordinates.length > 1 && (
+          <TimelineToggle
+            isEnabled={showTimelinePath}
+            onToggle={onToggleTimeline}
+            label={toggleLabel}
+          />
+        )}
+
+        <PhotoPlayButton
+          onPress={handlePlayPress}
+          label={playLabel}
+          disabled={sortedPhotos.length === 0}
+        />
+      </View>
     </View>
   );
 }
@@ -117,7 +119,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   map: {
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 2,
+    elevation: 2,
   },
 });

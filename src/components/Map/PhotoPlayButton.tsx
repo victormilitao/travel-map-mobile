@@ -26,7 +26,8 @@ const styles = StyleSheet.create({
   button: {
     position: 'absolute',
     bottom: 24,
-    alignSelf: 'center',
+    left: '50%',
+    marginLeft: -28,
     width: 56,
     height: 56,
     borderRadius: 28,
@@ -37,8 +38,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
     shadowRadius: 8,
-    elevation: 6,
-    zIndex: 1,
+    elevation: 8,
+    zIndex: 3,
   },
   buttonDisabled: {
     backgroundColor: '#B8B5D6',
