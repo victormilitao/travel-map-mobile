@@ -28,7 +28,7 @@ function parseExifGPS(exif: any): { lat: number | null, lng: number | null } {
 
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { trips, currentTripPhotos, isLoading, error, loadPhotosForTrip, addPhotosToTrip } = useAppStore();
+  const { trips, currentTripPhotos, isLoading, error, loadPhotosForTrip, addPhotosToTrip, showTimelinePath, toggleTimelinePath } = useAppStore();
   const { t } = useTranslation();
   
   const [activeTab, setActiveTab] = useState<'map' | 'gallery'>('map');
@@ -140,7 +140,13 @@ export default function TripDetailScreen() {
             <Text style={styles.emptyText}>{t('trip.empty')}</Text>
           </View>
         ) : activeTab === 'map' ? (
-          <PhotoMap photos={mapPhotos} />
+          <PhotoMap 
+            photos={mapPhotos} 
+            showTimelinePath={showTimelinePath}
+            onToggleTimeline={toggleTimelinePath}
+            toggleLabel={t('trip.timelinePath')}
+            playLabel={t('trip.playNextPhoto')}
+          />
         ) : (
           <FlatList
             data={currentTripPhotos}
