@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, FlatList, Dimensions, Alert } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, FlatList, Dimensions, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import PhotoMap from '../../components/Map/PhotoMap';
@@ -12,6 +13,7 @@ import { Photo } from '../../core/entities/Photo';
 const { width } = Dimensions.get('window');
 const COLUMN_COUNT = 3;
 const IMAGE_SIZE = width / COLUMN_COUNT;
+const GALLERY_ACTION_BAR_HEIGHT = 64;
 
 function parseExifGPS(exif: any): { lat: number | null, lng: number | null } {
   if (!exif || exif.GPSLatitude === undefined || exif.GPSLongitude === undefined) {
@@ -31,11 +33,14 @@ export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { trips, currentTripPhotos, isLoading, error, loadPhotosForTrip, addPhotosToTrip, deletePhotoFromTrip, showTimelinePath, toggleTimelinePath } = useAppStore();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   
   const [activeTab, setActiveTab] = useState<'map' | 'gallery'>('map');
   const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
   const trip = trips.find(t => t.id === id);
+  const selectedPhoto = currentTripPhotos.find(p => p.id === selectedPhotoId) ?? null;
+  const showGalleryRemoveBar = activeTab === 'gallery' && selectedPhoto !== null;
 
   useEffect(() => {
     if (id) {
@@ -137,7 +142,10 @@ export default function TripDetailScreen() {
       <View style={styles.tabContainer}>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'map' && styles.activeTab]}
-          onPress={() => setActiveTab('map')}
+          onPress={() => {
+            setActiveTab('map');
+            setSelectedPhotoId(null);
+          }}
         >
           <Text style={[styles.tabText, activeTab === 'map' && styles.activeTabText]}>
             {t('trip.map')}
@@ -195,7 +203,12 @@ export default function TripDetailScreen() {
             numColumns={COLUMN_COUNT}
             extraData={selectedPhotoId}
             style={styles.galleryList}
-            contentContainerStyle={styles.galleryContent}
+            contentContainerStyle={[
+              styles.galleryContent,
+              showGalleryRemoveBar && {
+                paddingBottom: GALLERY_ACTION_BAR_HEIGHT + insets.bottom + 16,
+              },
+            ]}
             columnWrapperStyle={styles.galleryRow}
             renderItem={({ item }) => (
               <GalleryPhotoItem
@@ -203,13 +216,26 @@ export default function TripDetailScreen() {
                 size={IMAGE_SIZE}
                 isSelected={selectedPhotoId === item.id}
                 onPress={() => handleSelectPhoto(item.id)}
-                onRemove={() => handleRemovePhoto(item)}
-                removeLabel={t('trip.removePhoto')}
               />
             )}
           />
         )}
       </View>
+
+      {showGalleryRemoveBar && selectedPhoto && (
+        <View style={[styles.galleryActionBar, { paddingBottom: insets.bottom + 12 }]}>
+          <Pressable
+            style={({ pressed }) => [
+              styles.removePhotoButton,
+              pressed && styles.removePhotoButtonPressed,
+            ]}
+            onPress={() => handleRemovePhoto(selectedPhoto)}
+          >
+            <Ionicons name="trash-outline" size={20} color="#FFF" />
+            <Text style={styles.removePhotoButtonText}>{t('trip.removePhoto')}</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -271,5 +297,38 @@ const styles = StyleSheet.create({
   },
   galleryRow: {
     alignItems: 'flex-start',
+  },
+  galleryActionBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    backgroundColor: '#FFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  removePhotoButton: {
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#E02424',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  removePhotoButtonPressed: {
+    backgroundColor: '#B91C1C',
+  },
+  removePhotoButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
