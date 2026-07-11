@@ -1,5 +1,6 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, StyleSheet } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 interface PhotoPlayButtonProps {
   onPress: () => void;
@@ -17,7 +18,7 @@ export default function PhotoPlayButton({ onPress, label, disabled = false }: Ph
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={styles.icon}>▶</Text>
+      <MaterialIcons name="skip-next" size={28} color="#FFF" />
     </TouchableOpacity>
   );
 }
@@ -44,10 +45,5 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     backgroundColor: '#B8B5D6',
     shadowOpacity: 0.1,
-  },
-  icon: {
-    color: '#FFF',
-    fontSize: 22,
-    marginLeft: 4,
   },
 });

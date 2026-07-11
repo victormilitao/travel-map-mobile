@@ -6,10 +6,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Animated,
-  Dimensions,
 } from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
 import { Image } from 'expo-image';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Photo } from '../../core/entities/Photo';
 import { useTranslation } from '../../hooks/useTranslation';
 import PhotoMarker from './PhotoMarker';
@@ -20,7 +21,8 @@ import {
   getTripDurationDays,
 } from '../../utils/geo';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const MAP_FLEX = 0.35;
+const PHOTO_FLEX = 0.65;
 const PHOTO_INTERVAL_MS = 2500;
 const MAP_ANIMATION_MS = 1200;
 
@@ -53,6 +55,7 @@ export default function TripReplay({
   onClose,
 }: TripReplayProps) {
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const mapRef = useRef<MapView>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [phase, setPhase] = useState<ReplayPhase>('playing');
@@ -169,79 +172,111 @@ export default function TripReplay({
       <View style={styles.container}>
         {hasEnoughPhotos ? (
           <>
-            <MapView ref={mapRef} style={styles.map}>
-              {revealedPath.length > 1 && (
-                <Polyline
-                  coordinates={revealedPath}
-                  strokeColor="#6C63FF"
-                  strokeWidth={4}
-                  geodesic
-                />
-              )}
+            {phase !== 'finished' && (
+              <View style={styles.replayLayout}>
+                <View style={styles.mapSection}>
+                  <MapView ref={mapRef} style={styles.map}>
+                    {revealedPath.length > 1 && (
+                      <Polyline
+                        coordinates={revealedPath}
+                        strokeColor="#6C63FF"
+                        strokeWidth={4}
+                        geodesic
+                      />
+                    )}
 
-              {sortedPhotos.map((photo) => (
-                <PhotoMarker
-                  key={photo.id}
-                  photo={photo}
-                  isActive={photo.id === activePhotoId}
-                />
-              ))}
-            </MapView>
+                    {sortedPhotos.map((photo) => (
+                      <PhotoMarker
+                        key={photo.id}
+                        photo={photo}
+                        isActive={photo.id === activePhotoId}
+                      />
+                    ))}
+                  </MapView>
 
-            <View style={styles.topBar}>
-              <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                <Text style={styles.closeButtonText}>✕</Text>
-              </TouchableOpacity>
-              <Text style={styles.tripTitle} numberOfLines={1}>
-                {tripName}
-              </Text>
-              <View style={styles.closeButtonPlaceholder} />
-            </View>
-
-            <View style={styles.progressTrack}>
-              <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
-            </View>
-
-            {phase !== 'finished' && currentPhoto && (
-              <Animated.View
-                style={[
-                  styles.photoCard,
-                  {
-                    opacity: cardAnim,
-                    transform: [
-                      {
-                        translateY: cardAnim.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [40, 0],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <Image
-                  source={{ uri: currentPhoto.uri }}
-                  style={styles.photoCardImage}
-                  contentFit="cover"
-                />
-                <View style={styles.photoCardInfo}>
-                  <Text style={styles.photoCardDate}>
-                    {new Date(currentPhoto.creationTime).toLocaleDateString(undefined, {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </Text>
-                  <Text style={styles.photoCardCounter}>
-                    {t('trip.photoOf', {
-                      current: activeIndex + 1,
-                      total: sortedPhotos.length,
-                    })}
-                  </Text>
+                  <TouchableOpacity
+                    onPress={handleClose}
+                    style={[styles.closeButton, { top: insets.top + 8 }]}
+                  >
+                    <Text style={styles.closeButtonText}>✕</Text>
+                  </TouchableOpacity>
                 </View>
-              </Animated.View>
+
+                {currentPhoto && (
+                  <Animated.View
+                    style={[
+                      styles.photoSection,
+                      {
+                        opacity: cardAnim,
+                        transform: [
+                          {
+                            translateY: cardAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [24, 0],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <Image
+                      source={{ uri: currentPhoto.uri }}
+                      style={styles.photoFull}
+                      contentFit="cover"
+                    />
+                    <View style={[styles.bottomBar, { paddingBottom: insets.bottom }]}>
+                      <View style={styles.bottomBarInfo}>
+                        <Text style={styles.photoDate} numberOfLines={1}>
+                          {new Date(currentPhoto.creationTime).toLocaleDateString(undefined, {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </Text>
+                        <Text style={styles.photoCounter}>
+                          {t('trip.photoOf', {
+                            current: activeIndex + 1,
+                            total: sortedPhotos.length,
+                          })}
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.pauseButton}
+                          onPress={togglePause}
+                          activeOpacity={0.8}
+                        >
+                          <MaterialIcons
+                            name={phase === 'paused' ? 'play-arrow' : 'pause'}
+                            size={17}
+                            color="#FFF"
+                          />
+                        </TouchableOpacity>
+                      </View>
+
+                      <View style={styles.progressTrack}>
+                        <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
+                      </View>
+                    </View>
+                  </Animated.View>
+                )}
+              </View>
+            )}
+
+            {phase === 'finished' && (
+              <>
+                <MapView ref={mapRef} style={styles.map}>
+                  {pathCoordinates.length > 1 && (
+                    <Polyline
+                      coordinates={pathCoordinates}
+                      strokeColor="#6C63FF"
+                      strokeWidth={4}
+                      geodesic
+                    />
+                  )}
+                  {sortedPhotos.map((photo) => (
+                    <PhotoMarker key={photo.id} photo={photo} isActive={false} />
+                  ))}
+                </MapView>
+              </>
             )}
 
             {phase === 'finished' && (
@@ -286,14 +321,6 @@ export default function TripReplay({
                 </View>
               </View>
             )}
-
-            {phase !== 'finished' && (
-              <TouchableOpacity style={styles.pauseButton} onPress={togglePause}>
-                <Text style={styles.pauseButtonText}>
-                  {phase === 'paused' ? '▶' : '⏸'}
-                </Text>
-              </TouchableOpacity>
-            )}
           </>
         ) : (
           <View style={styles.emptyState}>
@@ -312,112 +339,111 @@ export default function TripReplay({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a2e',
+    backgroundColor: '#000',
+  },
+  replayLayout: {
+    flex: 1,
+  },
+  mapSection: {
+    flex: MAP_FLEX,
+    position: 'relative',
   },
   map: {
     ...StyleSheet.absoluteFillObject,
   },
-  topBar: {
-    position: 'absolute',
-    top: 56,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    zIndex: 10,
-  },
   closeButton: {
+    position: 'absolute',
+    left: 16,
     width: 36,
     height: 36,
     borderRadius: 18,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 10,
   },
   closeButtonText: {
     color: '#FFF',
     fontSize: 16,
     fontWeight: '600',
   },
-  closeButtonPlaceholder: {
-    width: 36,
-  },
-  tripTitle: {
-    flex: 1,
-    textAlign: 'center',
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '700',
-    textShadowColor: 'rgba(0,0,0,0.6)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 4,
-  },
   progressTrack: {
-    position: 'absolute',
-    top: 100,
-    left: 16,
-    right: 16,
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 2,
-    zIndex: 10,
+    alignSelf: 'stretch',
+    height: 2,
+    marginTop: 4,
+    borderRadius: 1,
+    backgroundColor: 'rgba(255,255,255,0.25)',
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: '#6C63FF',
-    borderRadius: 2,
   },
-  photoCard: {
-    position: 'absolute',
-    bottom: 100,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 16,
+  photoSection: {
+    flex: PHOTO_FLEX,
+    backgroundColor: '#000',
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 10,
-    zIndex: 10,
   },
-  photoCardImage: {
+  photoFull: {
     width: '100%',
-    height: 160,
+    height: '100%',
   },
-  photoCardInfo: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  bottomBar: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingTop: 8,
+    paddingHorizontal: 12,
+    backgroundColor: 'transparent',
   },
-  photoCardDate: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+  bottomBarInfo: {
+    position: 'relative',
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 32,
+    marginBottom: 2,
   },
-  photoCardCounter: {
+  photoDate: {
+    flexShrink: 1,
     fontSize: 13,
-    color: '#888',
+    lineHeight: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    paddingRight: 36,
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  photoCounter: {
+    flexShrink: 1,
+    fontSize: 11,
+    lineHeight: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    textAlign: 'right',
+    paddingLeft: 36,
+    textShadowColor: 'rgba(0,0,0,0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   pauseButton: {
     position: 'absolute',
-    bottom: 32,
-    alignSelf: 'center',
-    left: SCREEN_WIDTH / 2 - 28,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    left: '50%',
+    marginLeft: -15,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: '#6C63FF',
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 10,
-  },
-  pauseButtonText: {
-    color: '#FFF',
-    fontSize: 22,
+    shadowColor: '#6C63FF',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.25,
+    shadowRadius: 2,
+    elevation: 3,
   },
   summaryOverlay: {
     ...StyleSheet.absoluteFillObject,
