@@ -18,6 +18,7 @@ interface AppState {
   deleteTrip: (tripId: string) => Promise<void>;
   loadPhotosForTrip: (tripId: string) => Promise<void>;
   addPhotosToTrip: (tripId: string, photos: Photo[]) => Promise<void>;
+  deletePhotoFromTrip: (photoId: string) => Promise<void>;
   setRepository: (repo: IPhotoRepository) => void;
   toggleTimelinePath: () => void;
 }
@@ -90,5 +91,19 @@ export const useAppStore = create<AppState>((set, get) => ({
     } catch (error: any) {
       set({ error: error.message || 'Erro ao adicionar fotos', isLoading: false });
     }
-  }
+  },
+
+  deletePhotoFromTrip: async (photoId: string) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { repository, currentTripPhotos } = get();
+      await repository.deletePhoto(photoId);
+      set({
+        currentTripPhotos: currentTripPhotos.filter(p => p.id !== photoId),
+        isLoading: false,
+      });
+    } catch (error: any) {
+      set({ error: error.message || 'Erro ao remover foto', isLoading: false });
+    }
+  },
 }));

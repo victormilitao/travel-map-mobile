@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, FlatList, Dimensions, Alert } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { Image } from 'expo-image';
 import { useAppStore } from '../../store/useAppStore';
 import { useTranslation } from '../../hooks/useTranslation';
 import PhotoMap from '../../components/Map/PhotoMap';
+import GalleryPhotoItem from '../../components/Gallery/GalleryPhotoItem';
 import { Photo } from '../../core/entities/Photo';
 
 const { width } = Dimensions.get('window');
@@ -28,10 +29,11 @@ function parseExifGPS(exif: any): { lat: number | null, lng: number | null } {
 
 export default function TripDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { trips, currentTripPhotos, isLoading, error, loadPhotosForTrip, addPhotosToTrip, showTimelinePath, toggleTimelinePath } = useAppStore();
+  const { trips, currentTripPhotos, isLoading, error, loadPhotosForTrip, addPhotosToTrip, deletePhotoFromTrip, showTimelinePath, toggleTimelinePath } = useAppStore();
   const { t } = useTranslation();
   
   const [activeTab, setActiveTab] = useState<'map' | 'gallery'>('map');
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
   const trip = trips.find(t => t.id === id);
 
@@ -83,6 +85,28 @@ export default function TripDetailScreen() {
 
       await addPhotosToTrip(id, newPhotos);
     }
+  };
+
+  const handleSelectPhoto = (photoId: string) => {
+    setSelectedPhotoId(prev => (prev === photoId ? null : photoId));
+  };
+
+  const handleRemovePhoto = (photo: Photo) => {
+    Alert.alert(
+      t('trip.removePhotoTitle'),
+      t('trip.removePhotoMessage'),
+      [
+        { text: t('home.cancel'), style: 'cancel' },
+        {
+          text: t('trip.removePhoto'),
+          style: 'destructive',
+          onPress: async () => {
+            await deletePhotoFromTrip(photo.id);
+            setSelectedPhotoId(null);
+          },
+        },
+      ],
+    );
   };
 
   if (!trip) {
@@ -166,11 +190,14 @@ export default function TripDetailScreen() {
             data={currentTripPhotos}
             keyExtractor={item => item.id}
             numColumns={COLUMN_COUNT}
+            extraData={selectedPhotoId}
             renderItem={({ item }) => (
-              <Image
-                source={{ uri: item.uri }}
-                style={styles.galleryImage}
-                contentFit="cover"
+              <GalleryPhotoItem
+                photo={item}
+                size={IMAGE_SIZE}
+                isSelected={selectedPhotoId === item.id}
+                onPress={() => handleSelectPhoto(item.id)}
+                onRemove={() => handleRemovePhoto(item)}
               />
             )}
           />
@@ -229,10 +256,4 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 16,
   },
-  galleryImage: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderWidth: 1,
-    borderColor: '#FFF',
-  }
 });
