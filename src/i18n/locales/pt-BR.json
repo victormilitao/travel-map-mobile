@@ -28,6 +28,9 @@
     "distance": "percorridos",
     "replayComplete": "Replay da viagem!",
     "photoOf": "%{current} de %{total}",
-    "notEnoughPhotos": "Adicione pelo menos 2 fotos com localização para gerar o replay."
+    "notEnoughPhotos": "Adicione pelo menos 2 fotos com localização para gerar o replay.",
+    "removePhoto": "Remover",
+    "removePhotoTitle": "Remover foto",
+    "removePhotoMessage": "Deseja remover esta foto da viagem?"
   }
 }
