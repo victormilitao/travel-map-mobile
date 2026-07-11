@@ -88,7 +88,7 @@ export default function TripDetailScreen() {
   };
 
   const handleSelectPhoto = (photoId: string) => {
-    setSelectedPhotoId(prev => (prev === photoId ? null : photoId));
+    setSelectedPhotoId(photoId);
   };
 
   const handleRemovePhoto = (photo: Photo) => {
@@ -145,7 +145,10 @@ export default function TripDetailScreen() {
         </TouchableOpacity>
         <TouchableOpacity 
           style={[styles.tab, activeTab === 'gallery' && styles.activeTab]}
-          onPress={() => setActiveTab('gallery')}
+          onPress={() => {
+            setActiveTab('gallery');
+            setSelectedPhotoId(null);
+          }}
         >
           <Text style={[styles.tabText, activeTab === 'gallery' && styles.activeTabText]}>
             {t('trip.gallery')}
@@ -191,6 +194,9 @@ export default function TripDetailScreen() {
             keyExtractor={item => item.id}
             numColumns={COLUMN_COUNT}
             extraData={selectedPhotoId}
+            style={styles.galleryList}
+            contentContainerStyle={styles.galleryContent}
+            columnWrapperStyle={styles.galleryRow}
             renderItem={({ item }) => (
               <GalleryPhotoItem
                 photo={item}
@@ -198,6 +204,7 @@ export default function TripDetailScreen() {
                 isSelected={selectedPhotoId === item.id}
                 onPress={() => handleSelectPhoto(item.id)}
                 onRemove={() => handleRemovePhoto(item)}
+                removeLabel={t('trip.removePhoto')}
               />
             )}
           />
@@ -255,5 +262,14 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#888',
     fontSize: 16,
+  },
+  galleryList: {
+    flex: 1,
+  },
+  galleryContent: {
+    paddingBottom: 24,
+  },
+  galleryRow: {
+    alignItems: 'flex-start',
   },
 });
