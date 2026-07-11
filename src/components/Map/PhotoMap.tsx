@@ -5,24 +5,46 @@ import { Photo } from '../../core/entities/Photo';
 import PhotoMarker from './PhotoMarker';
 import TimelineToggle from './TimelineToggle';
 import PhotoPlayButton from './PhotoPlayButton';
+import ReplayButton from './ReplayButton';
+import TripReplay from './TripReplay';
+
+interface ReplayLabels {
+  replayTrip: string;
+  pause: string;
+  resume: string;
+  close: string;
+  watchAgain: string;
+  photos: string;
+  days: string;
+  distance: string;
+  replayComplete: string;
+  notEnoughPhotos: string;
+}
 
 interface PhotoMapProps {
   photos: Photo[];
+  tripName?: string;
   showTimelinePath?: boolean;
   onToggleTimeline?: () => void;
   toggleLabel?: string;
   playLabel?: string;
+  replayLabel?: string;
+  replayLabels?: ReplayLabels;
 }
 
 export default function PhotoMap({
   photos,
+  tripName = '',
   showTimelinePath = true,
   onToggleTimeline,
   toggleLabel = 'Timeline',
   playLabel = 'Play',
+  replayLabel = 'Replay',
+  replayLabels,
 }: PhotoMapProps) {
   const mapRef = useRef<MapView>(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [replayVisible, setReplayVisible] = useState(false);
 
   const sortedPhotos = useMemo(() => {
     return [...photos]
@@ -109,7 +131,23 @@ export default function PhotoMap({
           label={playLabel}
           disabled={sortedPhotos.length === 0}
         />
+
+        <ReplayButton
+          onPress={() => setReplayVisible(true)}
+          label={replayLabel}
+          disabled={sortedPhotos.length < 2}
+        />
       </View>
+
+      {replayLabels && (
+        <TripReplay
+          visible={replayVisible}
+          photos={photos}
+          tripName={tripName}
+          labels={replayLabels}
+          onClose={() => setReplayVisible(false)}
+        />
+      )}
     </View>
   );
 }

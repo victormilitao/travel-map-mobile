@@ -17,6 +17,17 @@
     "gallery": "Gallery",
     "empty": "No photos in this trip.",
     "timelinePath": "Path",
-    "playNextPhoto": "Next photo"
+    "playNextPhoto": "Next photo",
+    "replayTrip": "Replay",
+    "pause": "Pause",
+    "resume": "Resume",
+    "close": "Close",
+    "watchAgain": "Watch again",
+    "photos": "photos",
+    "days": "days",
+    "distance": "traveled",
+    "replayComplete": "Trip replay!",
+    "photoOf": "%{current} of %{total}",
+    "notEnoughPhotos": "Add at least 2 photos with location to generate a replay."
   }
 }
