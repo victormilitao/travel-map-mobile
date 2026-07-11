@@ -141,11 +141,25 @@ export default function TripDetailScreen() {
           </View>
         ) : activeTab === 'map' ? (
           <PhotoMap 
-            photos={mapPhotos} 
+            photos={mapPhotos}
+            tripName={trip.name}
             showTimelinePath={showTimelinePath}
             onToggleTimeline={toggleTimelinePath}
             toggleLabel={t('trip.timelinePath')}
             playLabel={t('trip.playNextPhoto')}
+            replayLabel={t('trip.replayTrip')}
+            replayLabels={{
+              replayTrip: t('trip.replayTrip'),
+              pause: t('trip.pause'),
+              resume: t('trip.resume'),
+              close: t('trip.close'),
+              watchAgain: t('trip.watchAgain'),
+              photos: t('trip.photos'),
+              days: t('trip.days'),
+              distance: t('trip.distance'),
+              replayComplete: t('trip.replayComplete'),
+              notEnoughPhotos: t('trip.notEnoughPhotos'),
+            }}
           />
         ) : (
           <FlatList

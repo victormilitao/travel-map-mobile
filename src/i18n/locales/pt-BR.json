@@ -17,6 +17,17 @@
     "gallery": "Galeria",
     "empty": "Nenhuma foto nesta viagem.",
     "timelinePath": "Caminho",
-    "playNextPhoto": "Próxima foto"
+    "playNextPhoto": "Próxima foto",
+    "replayTrip": "Replay",
+    "pause": "Pausar",
+    "resume": "Continuar",
+    "close": "Fechar",
+    "watchAgain": "Assistir de novo",
+    "photos": "fotos",
+    "days": "dias",
+    "distance": "percorridos",
+    "replayComplete": "Replay da viagem!",
+    "photoOf": "%{current} de %{total}",
+    "notEnoughPhotos": "Adicione pelo menos 2 fotos com localização para gerar o replay."
   }
 }
